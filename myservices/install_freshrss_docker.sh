@@ -6,5 +6,6 @@ docker run -d --restart unless-stopped --log-opt max-size=10m \
   -v freshrss-extensions:/var/www/FreshRSS/extensions \
   -e 'CRON_MIN=4,34' \
   -e TZ=Asia/Shanghai \
+  -p 8080:80 \
   --net freshrss-network \
   --name freshrss freshrss/freshrss
