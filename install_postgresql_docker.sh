@@ -6,3 +6,4 @@ docker run -d \
     -e PGDATA=/var/lib/postgresql/data/pgdata \
     -v /custom/mount:/var/lib/postgresql/data \
     $postgres_img_name
+docker ps
