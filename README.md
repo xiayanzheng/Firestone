@@ -1,11 +1,15 @@
 # Firestone
 
 ## Before Run sh
+```
+weget https://raw.githubusercontent.com/xiayanzheng/Firestone/master/YourScript.sh
+```
+
 ```shell
-chmod u+x script.sh
+chmod u+x YourScript.sh
 ```
 
 ## Then
 ```
-./script.sh
+./YourScript.sh
 ```
