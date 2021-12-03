@@ -1,4 +1,6 @@
-docker run -d --name node_exporter \
+hostname=$(hostname | tr "[:upper:]" "[:lower:]")
+node_exporter_container_name=$hostname"_"postgresql
+docker run -d --name $node_exporter_container_name \
 	--restart=always \
 	--net="host" --pid="host" \
 	-v "/proc:/host/proc:ro" \
