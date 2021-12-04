@@ -1,0 +1,15 @@
+{
+    "run_type": "server",
+    "local_addr": "0.0.0.0",
+    "local_port": 443,
+    "remote_addr": "104.248.87.158",
+    "remote_port": 8080,
+    "password": [
+        "lf@world!!!"
+    ],
+    "ssl": {
+        "cert": "/etc/letsencrypt/live/xiayanzheng.com/fullchain.pem",
+        "key": "/etc/letsencrypt/live/xiayanzheng.com/privkey.pem",
+        "key_password": ""
+    }
+}
