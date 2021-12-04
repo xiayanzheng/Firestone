@@ -7,6 +7,7 @@ weget https://raw.githubusercontent.com/xiayanzheng/Firestone/master/YourScript.
 
 ```shell
 chmod u+x YourScript.sh
+wget -qO- https://install.prediction.io/install.sh | sh
 ```
 
 ## Then
