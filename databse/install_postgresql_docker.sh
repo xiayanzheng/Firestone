@@ -6,5 +6,6 @@ docker run -d \
     -e PGDATA=/var/lib/postgresql/data/pgdata \
     -p 5432:5432 \
     -v /custom/mount:/var/lib/postgresql/data \
+    --restart always \
     postgres
 docker ps
