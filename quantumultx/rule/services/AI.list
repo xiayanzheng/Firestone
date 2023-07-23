@@ -3,3 +3,13 @@ host-keyword,runway,AI
 host-suffix,agilebits.com,AI
 host-suffix,mixpanel.com,AI
 
+# > Perplexity
+host-suffix, perplexity.ai, AI
+
+# > Midjourney
+host-suffix,jsdelivr.net,AI
+host-suffix,discord.media,AI
+host-suffix,discordapp.com,AI
+host-suffix,flurry.com,AI
+host-suffix,discord.gg,AI
+host-suffix,discord.com,AI
