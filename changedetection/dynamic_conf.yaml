@@ -1,0 +1,4 @@
+tls:
+  certificates:
+    - certFile: /letsencrypt/novaspark.io.pem
+      keyFile: /letsencrypt/novaspark.io.key
