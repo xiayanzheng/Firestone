@@ -12,9 +12,6 @@ services:
       hostname: changedetection
       labels:
         - "traefik.enable=true"
-        # - traefik.http.routers.changedetection-http.rule=Host(`cd.novaspark.io`)
-        # - traefik.http.routers.changedetection-http.entrypoints=http
-        # - traefik.http.routers.changedetection-http.middlewares=https-redirect
         - "traefik.http.routers.changedetection.rule=Host(`cd.novaspark.io`)"
         - "traefik.http.routers.changedetection.entrypoints=websecure"
         - "traefik.http.routers.changedetection.tls.certresolver=letsencrypt"
@@ -98,6 +95,10 @@ services:
         container_name: traefik
         restart: unless-stopped
         command:
+          # Enable the Traefik log, for configurations and errors
+          - --log
+          # Enable the Dashboard and API
+          - --api
           # Tell Traefik to discover containers using the Docker API
           - --providers.docker=true
           # Enable the Trafik dashboard
@@ -128,12 +129,12 @@ services:
           - ./letsencrypt:/letsencrypt
         labels:
           - "traefik.enable=true"
-          - 'traefik.http.routers.traefik.rule=Host(`cd.novaspark.io`)'
-          - "traefik.http.routers.traefik.entrypoints=websecure"
-          - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
-          - "traefik.http.routers.traefik.service=api@internal"
-          - 'traefik.http.routers.traefik.middlewares=strip'
-          - 'traefik.http.middlewares.strip.stripprefix.prefixes=/traefik'
+          # - 'traefik.http.routers.traefik.rule=Host(`cdd.novaspark.io`)'
+          # - "traefik.http.routers.traefik.entrypoints=websecure"
+          # - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
+          # - "traefik.http.routers.traefik.service=api@internal"
+          # - 'traefik.http.routers.traefik.middlewares=strip'
+          # - 'traefik.http.middlewares.strip.stripprefix.prefixes=/traefik'
 
         # Used for fetching pages via Playwright+Chrome where you need Javascript support.
 
