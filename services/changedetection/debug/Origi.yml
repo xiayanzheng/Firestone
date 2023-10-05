@@ -97,6 +97,7 @@ services:
     traefik:
       image: "traefik:latest"
       container_name: "traefik"
+      restart: unless-stopped
       networks:
         - frontend
       ports:
@@ -136,7 +137,7 @@ services:
         - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
         # - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=http"
         #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
-        - "--certificatesresolvers.myresolver.acme.email=xiayanzheng@outlook.com"
+        - "--certificatesresolvers.myresolver.acme.email=your@email.addr"
         - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
       volumes:
         - "./letsencrypt:/letsencrypt"
