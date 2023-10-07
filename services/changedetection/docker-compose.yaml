@@ -1,23 +1,19 @@
 version: '3.2'
 networks:
-  frontend:
-    external:
-      name: reverse-proxy-docker-traefik_routing
+  web:
+    external: true
 services:
     changedetection:
       image: ghcr.io/dgtlmoon/changedetection.io
       container_name: changedetection
       networks:
-        - frontend
+        - web
       hostname: changedetection
       labels:
-        - "traefik.enable=true"
-        - traefik.http.routers.yourServices-http.rule=Host(`cd.novaspark.io`)
-        - traefik.http.routers.yourServices-http.entrypoints=http
-        - traefik.http.routers.yourServices-http.middlewares=https-redirect
-        - "traefik.http.routers.yourServices.rule=Host(`cd.novaspark.io`)"
-        - "traefik.http.routers.yourServices.entrypoints=https"
-        - "traefik.http.routers.yourServices.tls.certresolver=myresolver"
+        - traefik.enable=true
+        - traefik.http.routers.changedetection.rule=Host(`cd.novaspark.io`) # replace sr.cloudwatch.net with your domain name, leave /sonarr unchanged for now
+        - traefik.http.routers.changedetection.entrypoints=websecure
+        - traefik.http.routers.changedetection.tls.certresolver=letsencrypt
       volumes:
         - changedetection-data:/datastore
 # Configurable proxy list support, see https://github.com/dgtlmoon/changedetection.io/wiki/Proxy-configuration#proxy-list-support
@@ -80,7 +76,7 @@ services:
     browser-chrome:
       hostname: browser-chrome
       networks:
-        - frontend
+        - web
       image: selenium/standalone-chrome-debug:3.141.59
       environment:
           - VNC_NO_PASSWORD=1
@@ -93,75 +89,44 @@ services:
           - /dev/shm:/dev/shm
       restart: unless-stopped
 
-
     traefik:
-      image: "traefik:latest"
-      container_name: "traefik"
-      networks:
-        - frontend
-      ports:
-        - "80:80"
-        - "443:443"
-        - "8080:8080"
-      labels:
-        # Enable Traefik for this service, to make it available in the public network
-        - traefik.enable=true
-        # https-redirect middleware to redirect HTTP to HTTPS
-        # It can be re-used by other stacks in other Docker Compose files
-        - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
-        - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
-        # Dashboard HTTP here
-        - traefik.http.routers.traefik.rule=Host(`cd.novaspark.io`)
-        - traefik.http.routers.traefik.entrypoints=http
-        - traefik.http.routers.traefik.middlewares=https-redirect
-        # Dashboard HTTPS here
-        - traefik.http.routers.traefik-https.rule=Host(`cd.novaspark.io`)
-        - traefik.http.routers.traefik-https.entrypoints=https
-        - traefik.http.routers.traefik-https.tls=true
-        # Use the special Traefik service api@internal with the web UI/Dashboard
-        - traefik.http.routers.traefik-https.service=api@internal
-        # Use the Let's Encrypt resolver created below
-        - traefik.http.routers.traefik-https.tls.certresolver=myresolver
-      command:
-        # Enable the Traefik log, for configurations and errors
-        - --log
-        # Enable the Dashboard and API
-        - --api
-        - "--providers.docker=true"
-        - "--providers.docker.exposedbydefault=false"
-        # Create an entrypoint "http" listening on address 80
-        - --entrypoints.http.address=:80
-        # Create an entrypoint "https" listening on address 443
-        - --entrypoints.https.address=:443
-        - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
-        # - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=http"
-        #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
-        - "--certificatesresolvers.myresolver.acme.email=xiayanzheng@outlook.com"
-        - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-      volumes:
-        - "./letsencrypt:/letsencrypt"
-        - "/var/run/docker.sock:/var/run/docker.sock:ro"
+        networks:
+          - web
+        image: traefik:v2.5
+        container_name: traefik
+        restart: unless-stopped
+        command:
+          - --api=true
+          - --providers.docker.endpoint=unix:///var/run/docker.sock
+          - --providers.docker=true
+          - --providers.docker.exposedbydefault=false
+          - --entrypoints.web.address=:80
+          - --entrypoints.websecure.address=:443
+          - --entrypoints.console.address=:8080
+          - --certificatesresolvers.letsencrypt.acme.email=xiayanzheng@outlook.com  # replace with your email
+          - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+          - --certificatesresolvers.letsencrypt.acme.tlschallenge=true
+          - --entryPoints.web.http.redirections.entryPoint.to=websecure
+          - --entryPoints.web.http.redirections.entryPoint.scheme=https
+          - --entryPoints.web.http.redirections.entrypoint.permanent=true
+          # - --certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+          - --log.level=DEBUG
+          - --log.filePath=/logs/traefik.log
+        environment:
+          - CLOUDFLARE_EMAIL=${CLOUDFLARE_EMAIL}
+          - CLOUDFLARE_DNS_API_TOKEN=${CLOUDFLARE_DNS_API_TOKEN}
+        ports:
+          - "80:80"
+          - "443:443"
+          - "8080:8080"
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock:ro
+          - ./letsencrypt:/letsencrypt
+        labels:
+          - traefik.enable=true
+          - traefik.http.routers.thisproxylocal.rule=Host(`34.218.231.204`) # Change 192.168.100.120 to your Docker server IP.
+          - traefik.http.routers.thisproxylocal.entryPoints=console,websecure
+          - traefik.http.routers.thisproxylocal.service=api@internal
 
-     # Used for fetching pages via Playwright+Chrome where you need Javascript support.
-
-#    playwright-chrome:
-#        hostname: playwright-chrome
-#        image: browserless/chrome
-#        restart: unless-stopped
-#        environment:
-#            - SCREEN_WIDTH=1920
-#            - SCREEN_HEIGHT=1024
-#            - SCREEN_DEPTH=16
-#            - ENABLE_DEBUGGER=false
-#            - PREBOOT_CHROME=true
-#            - CONNECTION_TIMEOUT=300000
-#            - MAX_CONCURRENT_SESSIONS=10
-#            - CHROME_REFRESH_TIME=600000
-#            - DEFAULT_BLOCK_ADS=true
-#            - DEFAULT_STEALTH=true
-#
-#             Ignore HTTPS errors, like for self-signed certs
-#            - DEFAULT_IGNORE_HTTPS_ERRORS=true
-#
 volumes:
   changedetection-data:
