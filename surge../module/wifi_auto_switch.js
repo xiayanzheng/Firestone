@@ -1,5 +1,3 @@
-#!name=Wifi Auto Switch
-#!desc=Auto Switch Wifi
 const WIFI_DONT_NEED_PROXYS = ['johnwiley'];
 const CURRENT_WIFI_SSID_KEY = 'current_wifi_ssid';
 
